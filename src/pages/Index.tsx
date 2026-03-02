@@ -26,7 +26,7 @@ const Index = () => {
             <Link to="/login" className="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
               Entrar
             </Link>
-            <Link to="/cadastro" className="px-4 py-2 rounded-lg gradient-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity">
+            <Link to="/assinatura" className="px-4 py-2 rounded-lg gradient-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity">
               Começar Agora
             </Link>
           </div>
@@ -49,13 +49,13 @@ const Index = () => {
               100% baseada na legislação do Tocantins.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Link
-                to="/cadastro"
-                className="px-8 py-3.5 rounded-xl gradient-primary text-primary-foreground font-bold text-sm flex items-center gap-2 hover:opacity-90 transition-opacity glow-primary"
-              >
-                Começar Agora
-                <ArrowRight className="w-4 h-4" />
-              </Link>
+            <Link
+              to="/assinatura"
+              className="px-8 py-3.5 rounded-xl gradient-primary text-primary-foreground font-bold text-sm flex items-center gap-2 hover:opacity-90 transition-opacity glow-primary"
+            >
+              Começar Agora
+              <ArrowRight className="w-4 h-4" />
+            </Link>
               <Link
                 to="/login"
                 className="px-8 py-3.5 rounded-xl border border-border/50 text-foreground font-medium text-sm hover:bg-secondary transition-colors"
@@ -108,7 +108,7 @@ const Index = () => {
             </h2>
             <p className="text-sm text-muted-foreground mb-6">Acesso completo a toda a plataforma</p>
             <Link
-              to="/cadastro"
+              to="/assinatura"
               className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl gradient-gold text-gold-foreground font-bold text-sm hover:opacity-90 transition-opacity glow-gold"
             >
               Assinar Agora
