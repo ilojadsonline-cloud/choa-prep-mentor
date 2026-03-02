@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { AppLayout } from "@/components/AppLayout";
 import { StatCard } from "@/components/StatCard";
+import { useAuth } from "@/contexts/AuthContext";
 import { 
   CheckCircle, Target, BookOpen, Clock, TrendingUp, 
   Trophy, Calendar, Zap 
@@ -8,6 +9,8 @@ import {
 import { Progress } from "@/components/ui/progress";
 
 const Dashboard = () => {
+  const { profile } = useAuth();
+  const firstName = profile?.nome?.split(" ")[0] || "Aspirante";
   return (
     <AppLayout>
       <div className="max-w-7xl mx-auto space-y-6">
@@ -19,7 +22,7 @@ const Dashboard = () => {
         >
           <div>
             <h1 className="text-2xl md:text-3xl font-bold">
-              Bem-vindo, <span className="text-gradient-primary">Aspirante</span>
+              Bem-vindo, <span className="text-gradient-primary">{firstName}</span>
             </h1>
             <p className="text-sm text-muted-foreground mt-1">Continue sua preparação para o CHOA 2026</p>
           </div>
