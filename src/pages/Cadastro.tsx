@@ -10,7 +10,6 @@ const Cadastro = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [nome, setNome] = useState("");
   const [cpf, setCpf] = useState("");
-  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [termos, setTermos] = useState(false);
@@ -25,7 +24,7 @@ const Cadastro = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!nome || !cpf || !email || !password || !confirmPassword) {
+    if (!nome || !cpf || !password || !confirmPassword) {
       toast({ title: "Preencha todos os campos", variant: "destructive" });
       return;
     }
@@ -48,6 +47,7 @@ const Cadastro = () => {
 
     setLoading(true);
     const cleanedCpf = cleanCPF(cpf);
+    const generatedEmail = `${cleanedCpf}@choa.app`;
 
     // Check if CPF already exists
     const { data: cpfExists } = await supabase.rpc("check_cpf_exists", { p_cpf: cleanedCpf });
@@ -59,7 +59,7 @@ const Cadastro = () => {
 
     // Sign up with Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signUp({
-      email,
+      email: generatedEmail,
       password,
       options: { emailRedirectTo: window.location.origin },
     });
@@ -119,11 +119,7 @@ const Cadastro = () => {
               <input type="text" value={cpf} onChange={e => handleCpfChange(e.target.value)} placeholder="CPF" maxLength={14}
                 className="w-full pl-10 pr-4 py-3 rounded-xl bg-secondary border border-border/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-muted-foreground transition-all" />
             </div>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email"
-                className="w-full pl-10 pr-4 py-3 rounded-xl bg-secondary border border-border/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-muted-foreground transition-all" />
-            </div>
+            
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} placeholder="Senha (mín. 6 caracteres)"
