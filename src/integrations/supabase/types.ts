@@ -14,7 +14,122 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      questoes: {
+        Row: {
+          alt_a: string
+          alt_b: string
+          alt_c: string
+          alt_d: string
+          alt_e: string
+          assunto: string
+          comentario: string
+          created_at: string
+          dificuldade: string
+          disciplina: string
+          enunciado: string
+          gabarito: number
+          id: number
+        }
+        Insert: {
+          alt_a: string
+          alt_b: string
+          alt_c: string
+          alt_d: string
+          alt_e: string
+          assunto: string
+          comentario: string
+          created_at?: string
+          dificuldade?: string
+          disciplina: string
+          enunciado: string
+          gabarito: number
+          id?: never
+        }
+        Update: {
+          alt_a?: string
+          alt_b?: string
+          alt_c?: string
+          alt_d?: string
+          alt_e?: string
+          assunto?: string
+          comentario?: string
+          created_at?: string
+          dificuldade?: string
+          disciplina?: string
+          enunciado?: string
+          gabarito?: number
+          id?: never
+        }
+        Relationships: []
+      }
+      respostas_usuario: {
+        Row: {
+          correta: boolean
+          created_at: string
+          id: number
+          questao_id: number
+          resposta: number
+          user_id: string
+        }
+        Insert: {
+          correta: boolean
+          created_at?: string
+          id?: never
+          questao_id: number
+          resposta: number
+          user_id: string
+        }
+        Update: {
+          correta?: boolean
+          created_at?: string
+          id?: never
+          questao_id?: number
+          resposta?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "respostas_usuario_questao_id_fkey"
+            columns: ["questao_id"]
+            isOneToOne: false
+            referencedRelation: "questoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      simulados: {
+        Row: {
+          acertos: number
+          created_at: string
+          disciplina: string
+          finalizado: boolean
+          id: number
+          questao_ids: number[]
+          total: number
+          user_id: string
+        }
+        Insert: {
+          acertos?: number
+          created_at?: string
+          disciplina: string
+          finalizado?: boolean
+          id?: never
+          questao_ids: number[]
+          total: number
+          user_id: string
+        }
+        Update: {
+          acertos?: number
+          created_at?: string
+          disciplina?: string
+          finalizado?: boolean
+          id?: never
+          questao_ids?: number[]
+          total?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
