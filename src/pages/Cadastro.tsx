@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Shield, Mail, Lock, Eye, EyeOff, User, CreditCard, ArrowRight, Loader2 } from "lucide-react";
+import { Shield, Lock, Eye, EyeOff, User, CreditCard, ArrowRight, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCPF, cleanCPF, validateCPF } from "@/lib/cpf";
