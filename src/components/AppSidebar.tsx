@@ -3,6 +3,8 @@ import {
   CreditCard, LogOut, Shield, Menu, Star
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader,
@@ -20,6 +22,13 @@ const menuItems = [
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
+  const { signOut, profile } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate("/login");
+  };
 
   return (
     <Sidebar collapsible="icon" className="border-r border-border/50 gradient-sidebar">
@@ -62,15 +71,16 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-4">
-        {!collapsed && (
+        {!collapsed && profile && (
           <div className="glass-card rounded-lg p-3 mb-3">
-            <div className="flex items-center gap-2 mb-1">
-              <Star className="w-4 h-4 text-gold" />
-              <span className="text-xs font-semibold text-gold">Plano CHOA</span>
-            </div>
-            <p className="text-[10px] text-muted-foreground">Acesso completo por 90 dias</p>
+            <p className="text-xs font-semibold text-foreground truncate">{profile.nome}</p>
+            <p className="text-[10px] text-muted-foreground">CPF: {profile.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.***.***-$4')}</p>
           </div>
         )}
+        <button onClick={handleLogout} className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all">
+          <LogOut className="w-5 h-5 shrink-0" />
+          {!collapsed && <span>Sair</span>}
+        </button>
       </SidebarFooter>
     </Sidebar>
   );
