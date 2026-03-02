@@ -47,7 +47,7 @@ const Cadastro = () => {
 
     setLoading(true);
     const cleanedCpf = cleanCPF(cpf);
-    const generatedEmail = `${cleanedCpf}@choa.app`;
+    const generatedEmail = `user${cleanedCpf}@choaapp.com`;
 
     // Check if CPF already exists
     const { data: cpfExists } = await supabase.rpc("check_cpf_exists", { p_cpf: cleanedCpf });
