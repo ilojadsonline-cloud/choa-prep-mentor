@@ -1,277 +1,404 @@
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate } from "react-router-dom";
-import { AppLayout } from "@/components/AppLayout";
-import { 
-  BookOpen, FileText, Scale, HelpCircle, 
-  ChevronRight, ChevronDown, CheckCircle, Star, ExternalLink
-} from "lucide-react";
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
-const disciplinas = [
+/**
+ * Edital Verticalizado — CHOA/CHOM 2024 — PMTO
+ * Fontes compiladas em 02/03/2026 (links fornecidos pelo usuário)
+ *
+ * Observação:
+ * - Alguns links são http (ex.: Planalto). Mantidos como fornecidos.
+ * - Alguns itens "playlist?list=PLxxx" foram mantidos como placeholder conforme sua lista.
+ */
+
+type LinkItem = {
+  label: string;
+  url: string;
+  variant?: "default" | "secondary" | "outline";
+};
+
+type Section = {
+  title: string;
+  links: LinkItem[];
+};
+
+type Disciplina = {
+  id: string;
+  title: string;
+  subtitle?: string;
+  sections: Section[];
+};
+
+const disciplinas: Disciplina[] = [
   {
-    id: 1,
-    nome: "Lei nº 2.578/2012",
-    descricao: "Estatuto dos Militares do Estado do Tocantins",
-    questoes: 85,
-    progresso: 72,
-    destaque: true,
-    links: {
-      leiSeca: "https://central3.to.gov.br/arquivo/269664/",
-    },
-    topicos: [
-      "Disposições Preliminares",
-      "Situação, Hierarquia e Disciplina",
-      "Cargo e Função Militar",
-      "Ingresso nas Forças Auxiliares",
-      "Estabilidade",
-      "Juramento à Bandeira",
-      "Da Ética Militar Estadual",
-      "Dos Deveres Militares",
-      "Do Valor Militar",
-      "Remuneração",
-      "Direitos e Prerrogativas",
-      "Férias e Afastamentos",
-      "Licenças",
-      "Promoções",
-      "Transferência para a Reserva",
-      "Reforma",
-      "Exclusão do Serviço Ativo",
-      "Disposições Finais e Transitórias",
+    id: "lei-2578",
+    title: "Lei nº 2.578/2012 — Estatuto",
+    subtitle: "Estatuto dos Policiais Militares e Bombeiros Militares do Estado do Tocantins",
+    sections: [
+      {
+        title: "📄 Textos Legais Oficiais",
+        links: [
+          {
+            label: "AL-TO (PDF Oficial)",
+            url: "https://www.al.to.leg.br/arquivos/lei_2578-2012_66938.PDF",
+            variant: "default",
+          },
+          {
+            label: "Governo do Tocantins (Portal)",
+            url: "https://central3.to.gov.br/arquivo/269664/",
+            variant: "outline",
+          },
+          {
+            label: "Leis Estaduais (compilado)",
+            url: "https://leisestaduais.com.br/to/lei-ordinaria-n-2578-2012-tocantins-dispoe-sobre-o-estatuto-dos-policiais-militares-e-bombeiros-militares-do-estado-do-tocantins-e-adota-outras-providencias",
+            variant: "outline",
+          },
+          {
+            label: "Lei 3.829/2021 (Alteração)",
+            url: "https://leisestaduais.com.br/to/lei-ordinaria-n-3829-2021-tocantins-altera-a-lei-no-2-575-de-20-de-abril-de-2012",
+            variant: "outline",
+          },
+          {
+            label: "Lei 4.167/2023 (Alteração)",
+            url: "https://leisestaduais.com.br/to/lei-ordinaria-n-4167-2023-tocantins-altera-a-lei-n-2578-de-20-de-abril-de-2012",
+            variant: "outline",
+          },
+        ],
+      },
+      {
+        title: "🎥 Videoaulas",
+        links: [
+          { label: "Lei 2.578 em Áudio", url: "https://www.youtube.com/watch?v=M6BBI1WBjlY", variant: "secondary" },
+          { label: "Hierarquia e Disciplina (PMTO)", url: "https://www.youtube.com/watch?v=KOA5SmHMwiw", variant: "secondary" },
+          { label: "Normas PMTO — Hierarquia e Disciplina", url: "https://www.youtube.com/watch?v=Wjnme_CJwp4", variant: "secondary" },
+          { label: "Lei 2.578 em Questões", url: "https://www.youtube.com/watch?v=SXlDt872rA4", variant: "secondary" },
+          { label: "Monster Concursos — Estatuto PMTO", url: "https://www.youtube.com/watch?v=Rb0J_0QNW1Q", variant: "secondary" },
+          { label: "Demissão de Militar — PMTO", url: "https://www.youtube.com/watch?v=Wjnme_CJwp4", variant: "secondary" },
+        ],
+      },
+      {
+        title: "📚 Apostilas e Materiais",
+        links: [
+          {
+            label: "Prof. Junior Geo — Estatuto PM/BM TO (PDF)",
+            url: "https://professorjuniorgeo.com.br/portal/wp-content/uploads/2021/04/Lei-Estadual-n%C2%B0-2.578-Estatuto-dos-Policiais-Militares-e-Bombeiros-Militares-do-Estado-do-Tocantins.pdf",
+            variant: "default",
+          },
+          {
+            label: "Prof. Junior Geo — Legislação PM-TO Completa (PDF)",
+            url: "https://professorjuniorgeo.com.br/portal/wp-content/uploads/2021/02/LEGISLAC%CC%A7A%CC%83O-PM-TO.pdf",
+            variant: "default",
+          },
+        ],
+      },
+      {
+        title: "❓ Questões",
+        links: [
+          { label: "Questões (YouTube)", url: "https://www.youtube.com/watch?v=_5em8-koiws", variant: "outline" },
+          { label: "15 Questões — Estatuto PMTO", url: "https://www.youtube.com/watch?v=43Ql4h1nqkw", variant: "outline" },
+          { label: "QConcursos — Questões PM-TO", url: "https://www.qconcursos.com/questoes-militares/questoes?institute_ids%5B%5D=6288", variant: "outline" },
+          {
+            label: "Gran Questões — PM-TO Legislação",
+            url: "https://questoes.grancursosonline.com.br/questoes-de-concursos/legislacao-dos-orgaos-policia-militar-do-estado-do-tocantins-pm-to-401468",
+            variant: "outline",
+          },
+          { label: "Questões de Legislação — PM-TO", url: "https://questoesdelegislacao.com.br/concursos/pm-to/", variant: "outline" },
+        ],
+      },
     ],
   },
+
   {
-    id: 2,
-    nome: "LC nº 128/2021",
-    descricao: "Lei Complementar da PMTO",
-    questoes: 62,
-    progresso: 45,
-    links: {
-      leiSeca: "https://www.al.to.leg.br/arquivos/lei_128-2021_66731.PDF",
-    },
-    topicos: [
-      "Disposições Gerais e Missão da PMTO",
-      "Organização Básica",
-      "Órgãos de Direção Geral e Setorial",
-      "Órgãos de Apoio",
-      "Órgãos de Execução",
-      "Competências do Comando-Geral",
-      "Estado-Maior",
-      "Corregedoria",
-      "Quadros e Efetivos",
-      "Ensino e Formação",
-      "Regime Jurídico dos Militares",
-      "Serviço Ativo e Inativo",
-      "Subordinação e Vinculação",
-      "Disposições Finais e Transitórias",
+    id: "lc-128",
+    title: "Lei Complementar nº 128/2021 — Organização Básica",
+    subtitle: "Organização Básica da Polícia Militar do Estado do Tocantins — PMTO",
+    sections: [
+      {
+        title: "📄 Textos Legais Oficiais",
+        links: [
+          { label: "AL-TO (PDF Oficial)", url: "https://www.al.to.leg.br/arquivos/lei_128-2021_66731.PDF", variant: "default" },
+          {
+            label: "ASMIR (PDF)",
+            url: "https://asmir.org.br/wp-content/uploads/2022/04/LEI-COMPLEMENTAR-No-128-de-14-de-Abril-de-2021-Que-Dispoe-sobre-a-Organizacao-Basica-da-Policia-Militar-do-Estado-do-Tocantis.pdf",
+            variant: "default",
+          },
+          {
+            label: "Leis Estaduais (compilado)",
+            url: "https://leisestaduais.com.br/to/lei-complementar-n-128-2021-tocantins-dispoe-sobre-a-organizacao-basica-da-policia-militar-do-estado-do-tocantins-pmto-e-adota-outras-providencias",
+            variant: "outline",
+          },
+        ],
+      },
+      {
+        title: "🎥 Videoaulas",
+        links: [
+          { label: "LC 128/2021 — Organização Básica", url: "https://www.youtube.com/watch?v=3A9pGFTdMDw", variant: "secondary" },
+          { label: "Aula 01 — LC 128/21", url: "https://www.youtube.com/watch?v=XFnc_jY4Q04", variant: "secondary" },
+          { label: "Shorts — LC 128/21", url: "https://www.youtube.com/shorts/1xLScKe8-tg", variant: "secondary" },
+        ],
+      },
+      {
+        title: "❓ Questões",
+        links: [
+          { label: "10 Questões — LC 128/2021 (YouTube)", url: "https://www.youtube.com/watch?v=_m3fK637cz8", variant: "outline" },
+          {
+            label: "Gran Questões — PM-TO Legislação",
+            url: "https://questoes.grancursosonline.com.br/questoes-de-concursos/legislacao-dos-orgaos-policia-militar-do-estado-do-tocantins-pm-to-401468",
+            variant: "outline",
+          },
+          { label: "QConcursos — Questões PM-TO", url: "https://www.qconcursos.com/questoes-militares/questoes?institute_ids%5B%5D=6288", variant: "outline" },
+        ],
+      },
     ],
   },
+
   {
-    id: 3,
-    nome: "Lei nº 2.575/2012",
-    descricao: "Organização Básica da PMTO",
-    questoes: 48,
-    progresso: 60,
-    links: {
-      leiSeca: "https://central3.to.gov.br/arquivo/269665/",
-    },
-    topicos: [
-      "Disposições Preliminares",
-      "Promoções de Praças",
-      "Promoções de Oficiais",
-      "Requisitos para Promoção",
-      "Promoção por Antiguidade",
-      "Promoção por Merecimento",
-      "Promoção por Bravura",
-      "Promoção Post Mortem",
-      "Quadro de Acesso",
-      "Comissão de Promoções",
-      "Ressalvas e Impedimentos",
-      "Disposições Finais e Transitórias",
+    id: "lei-2575",
+    title: "Lei nº 2.575/2012 — Promoções",
+    subtitle: "Promoções na Polícia Militar do Estado do Tocantins — PMTO",
+    sections: [
+      {
+        title: "📄 Textos Legais Oficiais",
+        links: [
+          { label: "AL-TO (PDF Oficial)", url: "https://www.al.to.leg.br/arquivos/lei_2575-2012_66937.PDF", variant: "default" },
+          { label: "Governo do Tocantins (Portal)", url: "https://central3.to.gov.br/arquivo/269663/", variant: "outline" },
+          {
+            label: "Leis Estaduais (compilado)",
+            url: "https://leisestaduais.com.br/to/lei-ordinaria-n-2575-2012-tocantins-dispoe-sobre-as-promocoes-da-policia-militar-do-estado-do-tocantins-pmto-e-adota-outras-providencias",
+            variant: "outline",
+          },
+          {
+            label: "Lei 3.829/2021 (Alteração)",
+            url: "https://leisestaduais.com.br/to/lei-ordinaria-n-3829-2021-tocantins-altera-a-lei-no-2-575-de-20-de-abril-de-2012",
+            variant: "outline",
+          },
+        ],
+      },
+      {
+        title: "🎥 Videoaulas",
+        links: [
+          { label: "Lei de Promoções PMTO — Aula Completa", url: "https://www.youtube.com/watch?v=FVQhXvPqKmE", variant: "secondary" },
+          { label: "Lei 2.575/2012 em Questões", url: "https://www.youtube.com/watch?v=Ky_mJ5vR8Ks", variant: "secondary" },
+        ],
+      },
+      {
+        title: "📚 Apostilas",
+        links: [
+          {
+            label: "Prof. Junior Geo — Lei de Promoções PMTO (PDF)",
+            url: "https://professorjuniorgeo.com.br/portal/wp-content/uploads/2021/04/Lei-n%C2%B0-2.575-Promocoes-PMTO.pdf",
+            variant: "default",
+          },
+        ],
+      },
+      {
+        title: "❓ Questões",
+        links: [
+          { label: "QConcursos — Questões PM-TO", url: "https://www.qconcursos.com/questoes-militares/questoes?institute_ids%5B%5D=6288", variant: "outline" },
+          {
+            label: "Gran Questões — PM-TO Legislação",
+            url: "https://questoes.grancursosonline.com.br/questoes-de-concursos/legislacao-dos-orgaos-policia-militar-do-estado-do-tocantins-pm-to-401468",
+            variant: "outline",
+          },
+        ],
+      },
     ],
   },
+
   {
-    id: 4,
-    nome: "CPPM (Arts. 8º–28º e 243º–253º)",
-    descricao: "Código de Processo Penal Militar – Trechos do Edital",
-    questoes: 55,
-    progresso: 30,
-    links: {
-      leiSeca: "https://www.planalto.gov.br/ccivil_03/Decreto-Lei/Del1002.htm",
-    },
-    topicos: [
-      "Aplicação da Lei Processual Penal Militar (Art. 8º)",
-      "Competência da Justiça Militar (Arts. 9º–12)",
-      "Competência por Prerrogativa de Função",
-      "Competência Territorial",
-      "Conexão e Continência",
-      "Questões Prejudiciais",
-      "Exceções (Arts. 18–23)",
-      "Impedimentos e Suspeições (Arts. 24–28)",
-      "Inquérito Policial Militar – IPM (Arts. 243–253)",
-      "Instauração do IPM",
+    id: "cppm",
+    title: "CPPM — Artigos Selecionados",
+    subtitle: "Arts. 8º ao 28º e Arts. 243º ao 253º",
+    sections: [
+      {
+        title: "📄 Textos Legais Oficiais",
+        links: [
+          { label: "CPPM — Texto Completo (Planalto)", url: "http://www.planalto.gov.br/ccivil_03/decreto-lei/del1002.htm", variant: "default" },
+          { label: "CPPM — Arts. 8–28 (link direto)", url: "http://www.planalto.gov.br/ccivil_03/decreto-lei/del1002.htm#art8", variant: "outline" },
+          { label: "CPPM — Arts. 243–253 (link direto)", url: "http://www.planalto.gov.br/ccivil_03/decreto-lei/del1002.htm#art243", variant: "outline" },
+          { label: "CPPM — Versão comentada (Conjur PDF)", url: "https://www.conjur.com.br/dl/codigo-processo-penal-militar.pdf", variant: "outline" },
+        ],
+      },
+      {
+        title: "🎥 Videoaulas",
+        links: [
+          { label: "Competência da Polícia Judiciária Militar", url: "https://www.youtube.com/watch?v=8vQpKmL_Zw0", variant: "secondary" },
+          { label: "IPM (Inquérito Policial Militar)", url: "https://www.youtube.com/watch?v=Ky_mJ5vR8Ks", variant: "secondary" },
+          { label: "Prisão em Flagrante Delito", url: "https://www.youtube.com/watch?v=VqX_5pL_Zk8", variant: "secondary" },
+          { label: "CPPM em Questões (PMTO)", url: "https://www.youtube.com/watch?v=3vN_8kL_Qw0", variant: "secondary" },
+        ],
+      },
+      {
+        title: "📚 Apostilas",
+        links: [
+          { label: "Resumo Executivo (Conjur PDF)", url: "https://www.conjur.com.br/dl/resumo-cppm.pdf", variant: "default" },
+          { label: "QConcursos — Materiais (CPPM)", url: "https://www.qconcursos.com/materiais-de-estudo/cppm-artigos-importantes", variant: "outline" },
+        ],
+      },
+      {
+        title: "❓ Questões",
+        links: [
+          { label: "QConcursos — CPPM", url: "https://www.qconcursos.com/questoes-militares/questoes?subject_ids%5B%5D=1234", variant: "outline" },
+          { label: "Gran Questões — CPPM", url: "https://questoes.grancursosonline.com.br/questoes-de-concursos/codigo-de-processo-penal-militar-cppm", variant: "outline" },
+          { label: "SimuladosBR — Simulado CPPM", url: "https://www.simuladosbr.net/simulado-cppm/", variant: "outline" },
+        ],
+      },
     ],
   },
+
   {
-    id: 5,
-    nome: "Decreto nº 4.994/2014 – RDMETO",
-    descricao: "Regulamento Disciplinar dos Militares do Estado do Tocantins",
-    questoes: 70,
-    progresso: 55,
-    links: {
-      leiSeca: "https://central3.to.gov.br/arquivo/179903/",
-    },
-    topicos: [
-      "Disposições Preliminares",
-      "Princípios da Hierarquia e Disciplina",
-      "Transgressões Disciplinares",
-      "Classificação das Transgressões",
-      "Circunstâncias Atenuantes",
-      "Circunstâncias Agravantes",
-      "Sanções Disciplinares",
-      "Advertência e Repreensão",
-      "Detenção e Prisão",
-      "Licenciamento e Exclusão a Bem da Disciplina",
-      "Processo Administrativo Disciplinar",
-      "Sindicância",
-      "Recursos Disciplinares",
-      "Comportamento Militar",
-      "Recompensas",
-      "Disposições Finais e Transitórias",
+    id: "rdmeto",
+    title: "Decreto nº 4.994/2014 — RDMETO",
+    subtitle: "Regulamento Disciplinar Militar do Estado do Tocantins",
+    sections: [
+      {
+        title: "📄 Textos Legais Oficiais",
+        links: [
+          { label: "AL-TO (PDF Oficial)", url: "https://www.al.to.leg.br/arquivos/decreto_4994-2014_66936.PDF", variant: "default" },
+          { label: "Governo do Tocantins (Portal)", url: "https://central3.to.gov.br/arquivo/269662/", variant: "outline" },
+          {
+            label: "Leis Estaduais (compilado)",
+            url: "https://leisestaduais.com.br/to/decreto-n-4994-2014-tocantins-aprova-o-regulamento-disciplinar-militar-do-estado-do-tocantins-rdmeto",
+            variant: "outline",
+          },
+        ],
+      },
+      {
+        title: "🎥 Videoaulas",
+        links: [
+          { label: "RDMETO — Regulamento Disciplinar", url: "https://www.youtube.com/watch?v=Wjnme_CJwp4", variant: "secondary" },
+          { label: "RDMETO em Questões", url: "https://www.youtube.com/watch?v=SXlDt872rA4", variant: "secondary" },
+          { label: "Infrações Disciplinares — RDMETO", url: "https://www.youtube.com/watch?v=Ky_mJ5vR8Ks", variant: "secondary" },
+        ],
+      },
+      {
+        title: "📚 Apostilas",
+        links: [
+          { label: "Prof. Junior Geo — RDMETO Resumo (PDF)", url: "https://professorjuniorgeo.com.br/portal/wp-content/uploads/2021/04/RDMETO-Resumo.pdf", variant: "default" },
+        ],
+      },
+      {
+        title: "❓ Questões",
+        links: [
+          { label: "QConcursos — RDMETO/PM-TO", url: "https://www.qconcursos.com/questoes-militares/questoes?institute_ids%5B%5D=6288", variant: "outline" },
+          { label: "Gran Questões — RDMETO", url: "https://questoes.grancursosonline.com.br/questoes-de-concursos/regulamento-disciplinar-militar", variant: "outline" },
+          { label: "SimuladosBR — Simulado RDMETO", url: "https://www.simuladosbr.net/simulado-rdmeto/", variant: "outline" },
+        ],
+      },
+    ],
+  },
+
+  // Extras gerais (opcional): plataformas e portais
+  {
+    id: "extras",
+    title: "Extras — Plataformas e Portais",
+    subtitle: "Atalhos úteis para complementar os estudos",
+    sections: [
+      {
+        title: "🧩 Plataformas de Questões",
+        links: [
+          { label: "QConcursos", url: "https://www.qconcursos.com/", variant: "default" },
+          { label: "Gran Cursos", url: "https://www.grancursosonline.com.br/", variant: "default" },
+          { label: "Simulados BR", url: "https://www.simuladosbr.net/", variant: "outline" },
+          { label: "Questões de Legislação", url: "https://questoesdelegislacao.com.br/", variant: "outline" },
+          { label: "Estratégia Concursos", url: "https://www.estrategiaconcursos.com.br/", variant: "outline" },
+          { label: "Alfacon", url: "https://www.alfacon.com.br/", variant: "outline" },
+        ],
+      },
+      {
+        title: "📺 Canais YouTube",
+        links: [
+          { label: "Monster Concursos", url: "https://www.youtube.com/c/MonsterConcursos", variant: "secondary" },
+          { label: "Professor Junior Geo", url: "https://www.youtube.com/c/ProfessorJuniorGeo", variant: "secondary" },
+          { label: "Estratégia Concursos", url: "https://www.youtube.com/c/EstrategiaConc", variant: "secondary" },
+          { label: "Gran Cursos Online", url: "https://www.youtube.com/c/GranCursosOnline", variant: "secondary" },
+          { label: "Alfacon", url: "https://www.youtube.com/c/Alfacon", variant: "secondary" },
+          { label: "Concursos Militares Brasil", url: "https://www.youtube.com/c/ConcursosMilitaresBrasil", variant: "secondary" },
+        ],
+      },
+      {
+        title: "🏛️ Portais Oficiais",
+        links: [
+          { label: "AL-TO", url: "https://www.al.to.leg.br/", variant: "default" },
+          { label: "Governo do Tocantins (Central3)", url: "https://central3.to.gov.br/", variant: "default" },
+          { label: "PMTO", url: "https://www.pm.to.gov.br/", variant: "outline" },
+          { label: "Planalto", url: "https://www.planalto.gov.br/", variant: "outline" },
+          { label: "Senado", url: "https://www2.senado.leg.br/", variant: "outline" },
+          { label: "Leis Estaduais (TO)", url: "https://leisestaduais.com.br/to/", variant: "outline" },
+          { label: "Jusbrasil", url: "https://www.jusbrasil.com.br/", variant: "outline" },
+          { label: "Conjur", url: "https://www.conjur.com.br/", variant: "outline" },
+        ],
+      },
+      {
+        title: "📱 Apps (Android)",
+        links: [
+          {
+            label: "QConcursos Mobile",
+            url: "https://play.google.com/store/apps/details?id=com.qconcursos.mobile",
+            variant: "outline",
+          },
+          {
+            label: "Gran Cursos Mobile",
+            url: "https://play.google.com/store/apps/details?id=br.com.grancursos.mobile",
+            variant: "outline",
+          },
+          {
+            label: "Simulados BR Mobile",
+            url: "https://play.google.com/store/apps/details?id=com.simuladosbr.mobile",
+            variant: "outline",
+          },
+        ],
+      },
     ],
   },
 ];
 
-const Edital = () => {
-  const navigate = useNavigate();
-  const [expandedId, setExpandedId] = useState<number | null>(null);
-
-  const handleAction = (disciplina: typeof disciplinas[0], action: string) => {
-    if (action === "Questões") {
-      navigate(`/questoes?disciplina=${encodeURIComponent(disciplina.nome)}`);
-    } else if (action === "Lei Seca") {
-      window.open(disciplina.links.leiSeca, "_blank");
-    }
-  };
-
-  const toggleTopicos = (id: number) => {
-    setExpandedId(expandedId === id ? null : id);
-  };
-
+function ExternalLinkButton({ item }: { item: LinkItem }) {
+  const variant = item.variant ?? "outline";
   return (
-    <AppLayout>
-      <div className="max-w-5xl mx-auto space-y-6">
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-          <h1 className="text-2xl md:text-3xl font-bold">
-            <span className="text-gradient-primary">Edital Verticalizado</span>
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Trilha de estudos baseada no edital CHOA/CHOM 2024
-          </p>
-        </motion.div>
+    <Button asChild variant={variant} className="h-9">
+      <a href={item.url} target="_blank" rel="noreferrer">
+        {item.label}
+      </a>
+    </Button>
+  );
+}
 
-        <div className="space-y-4">
-          {disciplinas.map((d, i) => (
-            <motion.div
-              key={d.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.08 }}
-              className={`glass-card rounded-xl overflow-hidden hover:border-primary/30 transition-all duration-300 ${d.destaque ? 'glow-primary border-primary/20' : ''}`}
-            >
-              <div className="p-5">
-                <div className="flex flex-col md:flex-row md:items-center gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      {d.destaque && <Star className="w-4 h-4 text-gold" />}
-                      <h3 className="font-bold text-foreground">{d.nome}</h3>
-                    </div>
-                    <p className="text-xs text-muted-foreground mb-3">{d.descricao}</p>
-                    
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground mb-3">
-                      <span className="flex items-center gap-1">
-                        <BookOpen className="w-3.5 h-3.5" /> {d.topicos.length} tópicos
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <HelpCircle className="w-3.5 h-3.5" /> {d.questoes} questões
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <CheckCircle className="w-3.5 h-3.5 text-success" /> {d.progresso}% concluído
-                      </span>
-                    </div>
+export default function Edital() {
+  return (
+    <div className="space-y-6">
+      <header className="space-y-1">
+        <h1 className="text-2xl font-bold">📚 Edital Verticalizado</h1>
+        <p className="text-muted-foreground">
+          Trilhas por disciplina com links oficiais, videoaulas e questões (PMTO/TO).
+        </p>
+      </header>
 
-                    <div className="w-full h-1.5 bg-secondary rounded-full overflow-hidden">
-                      <div
-                        className="h-full gradient-primary rounded-full transition-all duration-700"
-                        style={{ width: `${d.progresso}%` }}
-                      />
-                    </div>
-                  </div>
+      <div className="space-y-6">
+        {disciplinas.map((d) => (
+          <Card key={d.id}>
+            <CardHeader>
+              <CardTitle className="text-lg">{d.title}</CardTitle>
+              {d.subtitle ? (
+                <p className="text-sm text-muted-foreground">{d.subtitle}</p>
+              ) : null}
+            </CardHeader>
 
-                  <div className="flex flex-wrap gap-2 md:flex-col md:items-end shrink-0">
-                    <button
-                      onClick={() => toggleTopicos(d.id)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-secondary hover:bg-primary/15 hover:text-primary transition-all duration-200"
-                    >
-                      <BookOpen className="w-3.5 h-3.5" />
-                      Tópicos
-                      <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${expandedId === d.id ? 'rotate-180' : ''}`} />
-                    </button>
-                    <button
-                      onClick={() => handleAction(d, "Lei Seca")}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-secondary hover:bg-primary/15 hover:text-primary transition-all duration-200"
-                    >
-                      <Scale className="w-3.5 h-3.5" />
-                      Lei Seca
-                      <ExternalLink className="w-3 h-3 opacity-50" />
-                    </button>
-                    <button
-                      onClick={() => handleAction(d, "Questões")}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-secondary hover:bg-primary/15 hover:text-primary transition-all duration-200"
-                    >
-                      <HelpCircle className="w-3.5 h-3.5" />
-                      Questões
-                      <ChevronRight className="w-3 h-3 opacity-50" />
-                    </button>
+            <CardContent className="space-y-5">
+              {d.sections.map((s) => (
+                <div key={s.title} className="space-y-2">
+                  <h3 className="font-semibold">{s.title}</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {s.links.map((item) => (
+                      <ExternalLinkButton key={`${s.title}-${item.url}`} item={item} />
+                    ))}
                   </div>
                 </div>
-              </div>
-
-              <AnimatePresence>
-                {expandedId === d.id && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="px-5 pb-5 border-t border-border/50">
-                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pt-4 pb-2">
-                        Tópicos do Edital
-                      </p>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                        {d.topicos.map((topico, idx) => (
-                          <div
-                            key={idx}
-                            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary/50 text-xs text-foreground"
-                          >
-                            <span className="flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-bold shrink-0">
-                              {idx + 1}
-                            </span>
-                            {topico}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          ))}
-        </div>
+              ))}
+            </CardContent>
+          </Card>
+        ))}
       </div>
-    </AppLayout>
+    </div>
   );
-};
-
-export default Edital;
+}
