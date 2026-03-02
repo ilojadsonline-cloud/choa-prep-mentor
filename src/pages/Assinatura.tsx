@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { AppLayout } from "@/components/AppLayout";
-import { CreditCard, Check, Shield, Zap, Star, Clock, Loader2 } from "lucide-react";
+import { CreditCard, Check, Shield, Zap, Star, Clock, Loader2, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
 
 const Assinatura = () => {
   const [loading, setLoading] = useState(false);
@@ -24,21 +24,23 @@ const Assinatura = () => {
   };
 
   return (
-    <AppLayout>
-      <div className="max-w-2xl mx-auto space-y-6">
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-center">
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/5" />
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gold/5 rounded-full blur-3xl animate-float" />
+      <div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
+
+      <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="relative w-full max-w-lg">
+        <div className="text-center mb-6">
+          <div className="w-14 h-14 rounded-2xl gradient-gold glow-gold flex items-center justify-center mx-auto mb-3">
+            <Shield className="w-7 h-7 text-gold-foreground" />
+          </div>
           <h1 className="text-2xl md:text-3xl font-bold">
             <span className="text-gradient-gold">Plano CHOA Trimestral</span>
           </h1>
           <p className="text-sm text-muted-foreground mt-1">Acesso completo à plataforma por 90 dias</p>
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="glass-card rounded-2xl p-8 relative overflow-hidden glow-gold border-gold/20"
-        >
+        <div className="glass-card rounded-2xl p-8 relative overflow-hidden glow-gold border-gold/20">
           <div className="absolute top-0 right-0 w-40 h-40 bg-gold/5 rounded-full -translate-y-16 translate-x-16" />
           
           <div className="text-center mb-6">
@@ -60,8 +62,7 @@ const Assinatura = () => {
               "Acesso completo ao banco de questões",
               "Gerador de simulados ilimitado",
               "Edital verticalizado com trilha guiada",
-              "Aulas em vídeo de todas as disciplinas",
-              "PDFs e Lei Seca comentada",
+              "Lei Seca comentada de cada disciplina",
               "Comentários fundamentados em cada questão",
               "Estatísticas detalhadas de desempenho",
               "Baseado 100% na legislação do Tocantins",
@@ -88,9 +89,20 @@ const Assinatura = () => {
             <span className="flex items-center gap-1"><Shield className="w-3 h-3" /> Pagamento seguro</span>
             <span className="flex items-center gap-1"><Zap className="w-3 h-3" /> Acesso imediato</span>
           </div>
-        </motion.div>
-      </div>
-    </AppLayout>
+
+          <div className="mt-6 pt-4 border-t border-border/30 text-center">
+            <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+              <Mail className="w-3 h-3" /> Contato: <a href="mailto:contato@metodochoa.store" className="text-primary hover:underline">contato@metodochoa.store</a>
+            </p>
+          </div>
+        </div>
+
+        <p className="text-center text-xs text-muted-foreground mt-4">
+          Já tem conta?{" "}
+          <Link to="/login" className="text-primary font-medium hover:underline">Entrar</Link>
+        </p>
+      </motion.div>
+    </div>
   );
 };
 
