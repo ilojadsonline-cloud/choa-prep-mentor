@@ -13,6 +13,7 @@ import Edital from "./pages/Edital";
 import Questoes from "./pages/Questoes";
 import Simulados from "./pages/Simulados";
 import Assinatura from "./pages/Assinatura";
+import GerarQuestoes from "./pages/GerarQuestoes";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/questoes" element={<ProtectedRoute><Questoes /></ProtectedRoute>} />
             <Route path="/simulados" element={<ProtectedRoute><Simulados /></ProtectedRoute>} />
             <Route path="/assinatura" element={<ProtectedRoute><Assinatura /></ProtectedRoute>} />
+            <Route path="/admin/gerar-questoes" element={<ProtectedRoute><GerarQuestoes /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

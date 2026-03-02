@@ -2,3 +2,6 @@ project_id = "axsnwyyraybgczmsntur"
 
 [functions.create-checkout]
 verify_jwt = false
+
+[functions.generate-questions]
+verify_jwt = false
