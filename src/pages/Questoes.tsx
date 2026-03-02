@@ -1,53 +1,84 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AppLayout } from "@/components/AppLayout";
 import { 
-  Filter, CheckCircle, XCircle, Star, BookmarkPlus,
-  ChevronDown, HelpCircle
+  Filter, CheckCircle, XCircle, Star, 
+  ChevronDown, HelpCircle, Loader2
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
 
-const mockQuestoes = [
-  {
-    id: 1,
-    disciplina: "Lei nº 2.578/2012",
-    assunto: "Hierarquia e Disciplina",
-    dificuldade: "Médio",
-    enunciado: "De acordo com a Lei nº 2.578/2012 do Estado do Tocantins, que dispõe sobre o Estatuto dos Militares, a hierarquia militar é a ordenação da autoridade em níveis diferentes. Sobre o tema, assinale a alternativa CORRETA:",
-    alternativas: [
-      "A hierarquia militar é estabelecida exclusivamente pela antiguidade no posto ou graduação.",
-      "A disciplina é a rigorosa observância e o acatamento integral das leis, regulamentos, normas e disposições.",
-      "O militar estadual que se encontra em inatividade está dispensado do cumprimento dos preceitos disciplinares.",
-      "A precedência entre militares de mesmo posto ou graduação é determinada unicamente pela data de nascimento.",
-      "A hierarquia e a disciplina são aplicáveis apenas durante o serviço ativo.",
-    ],
-    gabarito: 1,
-    comentario: "Conforme o Art. 14 da Lei nº 2.578/2012, a disciplina é a rigorosa observância e o acatamento integral das leis, regulamentos, normas e disposições que fundamentam o organismo militar e coordenam seu funcionamento regular e harmônico.",
-    favoritada: false,
-  },
-  {
-    id: 2,
-    disciplina: "RDMETO",
-    assunto: "Transgressões Disciplinares",
-    dificuldade: "Difícil",
-    enunciado: "Conforme o Decreto nº 4.994/2014 (RDMETO), sobre as transgressões disciplinares e suas classificações, é CORRETO afirmar que:",
-    alternativas: [
-      "As transgressões disciplinares são classificadas apenas em leves e graves.",
-      "A embriaguez em serviço é classificada como transgressão média.",
-      "As transgressões disciplinares são classificadas em leves, médias e graves, conforme sua natureza e repercussão.",
-      "O militar que comete transgressão leve está isento de qualquer punição disciplinar.",
-      "A classificação das transgressões independe das circunstâncias em que foram praticadas.",
-    ],
-    gabarito: 2,
-    comentario: "O RDMETO classifica as transgressões disciplinares em leves, médias e graves, levando em consideração a natureza dos fatos, as circunstâncias que os cercaram e a repercussão no âmbito da corporação.",
-    favoritada: true,
-  },
-];
+interface Questao {
+  id: number;
+  disciplina: string;
+  assunto: string;
+  dificuldade: string;
+  enunciado: string;
+  alt_a: string;
+  alt_b: string;
+  alt_c: string;
+  alt_d: string;
+  alt_e: string;
+  gabarito: number;
+  comentario: string;
+}
+
+function shuffleArray<T>(arr: T[]): T[] {
+  const shuffled = [...arr];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+function shuffleAlternatives(q: Questao) {
+  const alts = [
+    { text: q.alt_a, origIndex: 0 },
+    { text: q.alt_b, origIndex: 1 },
+    { text: q.alt_c, origIndex: 2 },
+    { text: q.alt_d, origIndex: 3 },
+    { text: q.alt_e, origIndex: 4 },
+  ];
+  const shuffled = shuffleArray(alts);
+  const newGabarito = shuffled.findIndex(a => a.origIndex === q.gabarito);
+  return { alternativas: shuffled.map(a => a.text), gabarito: newGabarito };
+}
 
 const Questoes = () => {
+  const [questoes, setQuestoes] = useState<(Questao & { alternativas: string[]; gabaritoShuffled: number })[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedAnswer, setSelectedAnswer] = useState<Record<number, number>>({});
   const [revealed, setRevealed] = useState<Record<number, boolean>>({});
   const [filterOpen, setFilterOpen] = useState(false);
+  const [filterDisciplina, setFilterDisciplina] = useState("Todos");
+  const [filterDificuldade, setFilterDificuldade] = useState("Todos");
+
+  const disciplinas = ["Todos", "Lei nº 2.578/2012", "LC nº 128/2021", "Lei nº 2.575/2012", "CPPM", "RDMETO"];
+  const dificuldades = ["Todos", "Fácil", "Médio", "Difícil"];
+
+  useEffect(() => {
+    fetchQuestoes();
+  }, [filterDisciplina, filterDificuldade]);
+
+  const fetchQuestoes = async () => {
+    setLoading(true);
+    let query = supabase.from("questoes").select("*");
+    if (filterDisciplina !== "Todos") query = query.eq("disciplina", filterDisciplina);
+    if (filterDificuldade !== "Todos") query = query.eq("dificuldade", filterDificuldade);
+
+    const { data, error } = await query.order("id");
+    if (!error && data) {
+      const shuffled = shuffleArray(data as Questao[]).map(q => {
+        const { alternativas, gabarito } = shuffleAlternatives(q);
+        return { ...q, alternativas, gabaritoShuffled: gabarito };
+      });
+      setQuestoes(shuffled);
+    }
+    setLoading(false);
+    setSelectedAnswer({});
+    setRevealed({});
+  };
 
   const handleAnswer = (questaoId: number, altIndex: number) => {
     if (revealed[questaoId]) return;
@@ -72,7 +103,7 @@ const Questoes = () => {
             <h1 className="text-2xl md:text-3xl font-bold">
               <span className="text-gradient-primary">Banco de Questões</span>
             </h1>
-            <p className="text-sm text-muted-foreground mt-1">Questões no estilo prova PMTO</p>
+            <p className="text-sm text-muted-foreground mt-1">{questoes.length} questões disponíveis</p>
           </div>
           <button
             onClick={() => setFilterOpen(!filterOpen)}
@@ -90,105 +121,125 @@ const Questoes = () => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              className="glass-card rounded-xl p-4 grid grid-cols-2 md:grid-cols-4 gap-3"
+              className="glass-card rounded-xl p-4 grid grid-cols-2 gap-3"
             >
-              {["Disciplina", "Assunto", "Dificuldade", "Status"].map((f) => (
-                <div key={f}>
-                  <label className="text-xs text-muted-foreground mb-1 block">{f}</label>
-                  <select className="w-full rounded-lg bg-secondary border-none text-sm p-2 text-foreground focus:ring-1 focus:ring-primary outline-none">
-                    <option>Todos</option>
-                  </select>
-                </div>
-              ))}
+              <div>
+                <label className="text-xs text-muted-foreground mb-1 block">Disciplina</label>
+                <select
+                  value={filterDisciplina}
+                  onChange={e => setFilterDisciplina(e.target.value)}
+                  className="w-full rounded-lg bg-secondary border-none text-sm p-2 text-foreground focus:ring-1 focus:ring-primary outline-none"
+                >
+                  {disciplinas.map(d => <option key={d}>{d}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground mb-1 block">Dificuldade</label>
+                <select
+                  value={filterDificuldade}
+                  onChange={e => setFilterDificuldade(e.target.value)}
+                  className="w-full rounded-lg bg-secondary border-none text-sm p-2 text-foreground focus:ring-1 focus:ring-primary outline-none"
+                >
+                  {dificuldades.map(d => <option key={d}>{d}</option>)}
+                </select>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        <div className="space-y-6">
-          {mockQuestoes.map((q, qi) => (
-            <motion.div
-              key={q.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: qi * 0.1 }}
-              className="glass-card rounded-xl p-5 space-y-4"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Badge variant="outline" className="text-[10px] bg-primary/10 text-primary border-primary/30">
-                    {q.disciplina}
-                  </Badge>
-                  <Badge variant="outline" className={`text-[10px] ${getDifficultyColor(q.dificuldade)}`}>
-                    {q.dificuldade}
-                  </Badge>
-                  <span className="text-[10px] text-muted-foreground">{q.assunto}</span>
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        ) : questoes.length === 0 ? (
+          <div className="text-center py-20 text-muted-foreground">
+            <p className="text-lg font-medium">Nenhuma questão encontrada</p>
+            <p className="text-sm">Tente alterar os filtros</p>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {questoes.map((q, qi) => (
+              <motion.div
+                key={q.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: Math.min(qi * 0.05, 0.5) }}
+                className="glass-card rounded-xl p-5 space-y-4"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Badge variant="outline" className="text-[10px] bg-primary/10 text-primary border-primary/30">
+                      {q.disciplina}
+                    </Badge>
+                    <Badge variant="outline" className={`text-[10px] ${getDifficultyColor(q.dificuldade)}`}>
+                      {q.dificuldade}
+                    </Badge>
+                    <span className="text-[10px] text-muted-foreground">{q.assunto}</span>
+                  </div>
                 </div>
-                <button className="text-muted-foreground hover:text-gold transition-colors">
-                  <Star className={`w-4 h-4 ${q.favoritada ? 'fill-gold text-gold' : ''}`} />
-                </button>
-              </div>
 
-              <p className="text-sm leading-relaxed text-foreground">{q.enunciado}</p>
+                <p className="text-sm leading-relaxed text-foreground">{q.enunciado}</p>
 
-              <div className="space-y-2">
-                {q.alternativas.map((alt, ai) => {
-                  const isSelected = selectedAnswer[q.id] === ai;
-                  const isCorrect = q.gabarito === ai;
-                  const isRevealed = revealed[q.id];
+                <div className="space-y-2">
+                  {q.alternativas.map((alt, ai) => {
+                    const isSelected = selectedAnswer[q.id] === ai;
+                    const isCorrect = q.gabaritoShuffled === ai;
+                    const isRevealed = revealed[q.id];
 
-                  let altClass = "bg-secondary/50 hover:bg-secondary border-transparent";
-                  if (isRevealed && isCorrect) {
-                    altClass = "bg-success/10 border-success/40 text-success";
-                  } else if (isRevealed && isSelected && !isCorrect) {
-                    altClass = "bg-destructive/10 border-destructive/40 text-destructive";
-                  } else if (isSelected) {
-                    altClass = "bg-primary/10 border-primary/40 text-primary";
-                  }
+                    let altClass = "bg-secondary/50 hover:bg-secondary border-transparent";
+                    if (isRevealed && isCorrect) {
+                      altClass = "bg-success/10 border-success/40 text-success";
+                    } else if (isRevealed && isSelected && !isCorrect) {
+                      altClass = "bg-destructive/10 border-destructive/40 text-destructive";
+                    } else if (isSelected) {
+                      altClass = "bg-primary/10 border-primary/40 text-primary";
+                    }
 
-                  return (
-                    <button
-                      key={ai}
-                      onClick={() => handleAnswer(q.id, ai)}
-                      className={`w-full text-left flex items-start gap-3 p-3 rounded-lg border text-sm transition-all duration-200 ${altClass}`}
-                    >
-                      <span className="w-6 h-6 shrink-0 rounded-full border flex items-center justify-center text-xs font-bold mt-0.5">
-                        {String.fromCharCode(65 + ai)}
-                      </span>
-                      <span className="flex-1">{alt}</span>
-                      {isRevealed && isCorrect && <CheckCircle className="w-4 h-4 shrink-0 mt-0.5 text-success" />}
-                      {isRevealed && isSelected && !isCorrect && <XCircle className="w-4 h-4 shrink-0 mt-0.5 text-destructive" />}
-                    </button>
-                  );
-                })}
-              </div>
+                    return (
+                      <button
+                        key={ai}
+                        onClick={() => handleAnswer(q.id, ai)}
+                        className={`w-full text-left flex items-start gap-3 p-3 rounded-lg border text-sm transition-all duration-200 ${altClass}`}
+                      >
+                        <span className="w-6 h-6 shrink-0 rounded-full border flex items-center justify-center text-xs font-bold mt-0.5">
+                          {String.fromCharCode(65 + ai)}
+                        </span>
+                        <span className="flex-1">{alt}</span>
+                        {isRevealed && isCorrect && <CheckCircle className="w-4 h-4 shrink-0 mt-0.5 text-success" />}
+                        {isRevealed && isSelected && !isCorrect && <XCircle className="w-4 h-4 shrink-0 mt-0.5 text-destructive" />}
+                      </button>
+                    );
+                  })}
+                </div>
 
-              {selectedAnswer[q.id] !== undefined && !revealed[q.id] && (
-                <button
-                  onClick={() => handleReveal(q.id)}
-                  className="w-full py-2.5 rounded-lg gradient-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity"
-                >
-                  Confirmar Resposta
-                </button>
-              )}
-
-              <AnimatePresence>
-                {revealed[q.id] && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    className="p-4 rounded-lg bg-primary/5 border border-primary/20"
+                {selectedAnswer[q.id] !== undefined && !revealed[q.id] && (
+                  <button
+                    onClick={() => handleReveal(q.id)}
+                    className="w-full py-2.5 rounded-lg gradient-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity"
                   >
-                    <div className="flex items-center gap-2 mb-2">
-                      <HelpCircle className="w-4 h-4 text-primary" />
-                      <span className="text-xs font-semibold text-primary">Comentário</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed">{q.comentario}</p>
-                  </motion.div>
+                    Confirmar Resposta
+                  </button>
                 )}
-              </AnimatePresence>
-            </motion.div>
-          ))}
-        </div>
+
+                <AnimatePresence>
+                  {revealed[q.id] && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      className="p-4 rounded-lg bg-primary/5 border border-primary/20"
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <HelpCircle className="w-4 h-4 text-primary" />
+                        <span className="text-xs font-semibold text-primary">Comentário</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground leading-relaxed">{q.comentario}</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
     </AppLayout>
   );
