@@ -1,9 +1,11 @@
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { 
   BookOpen, Video, FileText, Scale, HelpCircle, 
   ChevronRight, CheckCircle, Star 
 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const disciplinas = [
   {
@@ -50,6 +52,17 @@ const disciplinas = [
 ];
 
 const Edital = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleAction = (disciplina: string, action: string) => {
+    if (action === "Questões") {
+      navigate(`/questoes?disciplina=${encodeURIComponent(disciplina)}`);
+    } else {
+      toast({ title: `${action} — Em breve`, description: `O conteúdo de ${action} para "${disciplina}" será disponibilizado em breve.` });
+    }
+  };
+
   return (
     <AppLayout>
       <div className="max-w-5xl mx-auto space-y-6">
@@ -109,6 +122,7 @@ const Edital = () => {
                   ].map((btn) => (
                     <button
                       key={btn.label}
+                      onClick={() => handleAction(d.nome, btn.label)}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-secondary hover:bg-primary/15 hover:text-primary transition-all duration-200"
                     >
                       {btn.icon}

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { AppLayout } from "@/components/AppLayout";
 import { 
@@ -46,12 +47,15 @@ function shuffleAlternatives(q: Questao) {
 }
 
 const Questoes = () => {
+  const [searchParams] = useSearchParams();
+  const initialDisciplina = searchParams.get("disciplina") || "Todos";
+
   const [questoes, setQuestoes] = useState<(Questao & { alternativas: string[]; gabaritoShuffled: number })[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedAnswer, setSelectedAnswer] = useState<Record<number, number>>({});
   const [revealed, setRevealed] = useState<Record<number, boolean>>({});
   const [filterOpen, setFilterOpen] = useState(false);
-  const [filterDisciplina, setFilterDisciplina] = useState("Todos");
+  const [filterDisciplina, setFilterDisciplina] = useState(initialDisciplina);
   const [filterDificuldade, setFilterDificuldade] = useState("Todos");
 
   const disciplinas = ["Todos", "Lei nº 2.578/2012", "LC nº 128/2021", "Lei nº 2.575/2012", "CPPM", "RDMETO"];
