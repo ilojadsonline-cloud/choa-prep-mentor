@@ -12,30 +12,22 @@ serve(async (req) => {
   }
 
   try {
+    const { session_id } = await req.json();
+    if (!session_id) throw new Error("session_id is required");
+
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2025-08-27.basil",
     });
 
-    const origin = req.headers.get("origin") || "https://choa-prep-mentor.lovable.app";
+    const session = await stripe.checkout.sessions.retrieve(session_id);
 
-    const session = await stripe.checkout.sessions.create({
-      line_items: [
-        {
-          price: "price_1T6cGtCg2jQPLyBVbJJcJNlM",
-          quantity: 1,
-        },
-      ],
-      mode: "payment",
-      success_url: `${origin}/cadastro?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/assinatura?payment=canceled`,
-      custom_text: {
-        submit: {
-          message: "Após o pagamento, você será redirecionado para criar sua conta.",
-        },
-      },
-    });
+    const paid = session.payment_status === "paid";
 
-    return new Response(JSON.stringify({ url: session.url }), {
+    return new Response(JSON.stringify({
+      paid,
+      customer_email: session.customer_details?.email || null,
+      amount_total: session.amount_total,
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
