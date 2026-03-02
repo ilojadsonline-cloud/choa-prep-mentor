@@ -60,11 +60,8 @@ const Assinatura = () => {
           <div className="space-y-3 mb-8">
             {[
               "Acesso completo ao banco de questões",
-              "Gerador de simulados ilimitado",
+              "Gerador de simulados",
               "Edital verticalizado com trilha guiada",
-              "Lei Seca comentada de cada disciplina",
-              "Comentários fundamentados em cada questão",
-              "Estatísticas detalhadas de desempenho",
               "Baseado 100% na legislação do Tocantins",
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-3">
