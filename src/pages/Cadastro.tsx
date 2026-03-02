@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Shield, Lock, Eye, EyeOff, User, CreditCard, ArrowRight, Loader2 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Shield, Lock, Eye, EyeOff, User, CreditCard, ArrowRight, Loader2, AlertTriangle } from "lucide-react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCPF, cleanCPF, validateCPF } from "@/lib/cpf";
 import { useToast } from "@/hooks/use-toast";
@@ -14,8 +14,38 @@ const Cadastro = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [termos, setTermos] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [paymentVerified, setPaymentVerified] = useState(false);
+  const [verifyingPayment, setVerifyingPayment] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+
+  const sessionId = searchParams.get("session_id");
+
+  useEffect(() => {
+    const verifyPayment = async () => {
+      if (!sessionId) {
+        setVerifyingPayment(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase.functions.invoke("verify-payment", {
+          body: { session_id: sessionId },
+        });
+
+        if (error) throw error;
+        if (data?.paid) {
+          setPaymentVerified(true);
+        }
+      } catch (err) {
+        console.error("Erro ao verificar pagamento:", err);
+      }
+      setVerifyingPayment(false);
+    };
+
+    verifyPayment();
+  }, [sessionId]);
 
   const handleCpfChange = (value: string) => {
     setCpf(formatCPF(value));
@@ -23,6 +53,11 @@ const Cadastro = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!paymentVerified) {
+      toast({ title: "Pagamento não verificado", description: "Efetue o pagamento antes de criar sua conta.", variant: "destructive" });
+      return;
+    }
 
     if (!nome || !cpf || !password || !confirmPassword) {
       toast({ title: "Preencha todos os campos", variant: "destructive" });
@@ -49,7 +84,6 @@ const Cadastro = () => {
     const cleanedCpf = cleanCPF(cpf);
     const generatedEmail = `user${cleanedCpf}@choaapp.com`;
 
-    // Check if CPF already exists
     const { data: cpfExists } = await supabase.rpc("check_cpf_exists", { p_cpf: cleanedCpf });
     if (cpfExists) {
       toast({ title: "CPF já cadastrado", description: "Este CPF já possui uma conta.", variant: "destructive" });
@@ -57,7 +91,6 @@ const Cadastro = () => {
       return;
     }
 
-    // Sign up with Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: generatedEmail,
       password,
@@ -71,7 +104,6 @@ const Cadastro = () => {
     }
 
     if (authData.user) {
-      // Create profile
       const { error: profileError } = await supabase.from("profiles").insert({
         user_id: authData.user.id,
         nome,
@@ -91,6 +123,53 @@ const Cadastro = () => {
     setLoading(false);
   };
 
+  if (verifyingPayment) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/5" />
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="relative text-center space-y-4">
+          <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto" />
+          <p className="text-sm text-muted-foreground">Verificando pagamento...</p>
+        </motion.div>
+      </div>
+    );
+  }
+
+  if (!paymentVerified) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/5" />
+        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-float" />
+        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="relative w-full max-w-md text-center space-y-6">
+          <div className="w-16 h-16 rounded-2xl bg-destructive/10 flex items-center justify-center mx-auto">
+            <AlertTriangle className="w-8 h-8 text-destructive" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-foreground mb-2">Pagamento Necessário</h1>
+            <p className="text-sm text-muted-foreground">
+              Para criar sua conta, é necessário efetuar o pagamento da assinatura primeiro.
+            </p>
+          </div>
+          <div className="flex flex-col gap-3">
+            <Link
+              to="/assinatura"
+              className="w-full py-3 rounded-xl gradient-gold text-gold-foreground font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity glow-gold"
+            >
+              <CreditCard className="w-4 h-4" />
+              Ir para Assinatura
+            </Link>
+            <Link
+              to="/login"
+              className="text-xs text-muted-foreground hover:text-primary transition-colors"
+            >
+              Já tem conta? Entrar
+            </Link>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/5" />
@@ -102,10 +181,19 @@ const Cadastro = () => {
             <Shield className="w-7 h-7 text-primary-foreground" />
           </div>
           <h1 className="text-xl font-black text-gradient-primary">CHOA 2026</h1>
-          <p className="text-xs text-muted-foreground">Crie sua conta e comece a estudar</p>
+          <p className="text-xs text-muted-foreground">Pagamento confirmado! Crie sua conta abaixo.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="glass-card rounded-2xl p-6 space-y-4">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-success/10 border border-success/20 mb-2">
+            <div className="w-5 h-5 rounded-full bg-success/20 flex items-center justify-center shrink-0">
+              <svg className="w-3 h-3 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <span className="text-xs font-medium text-success">Pagamento verificado com sucesso</span>
+          </div>
+
           <h2 className="text-lg font-bold text-center">Cadastro</h2>
 
           <div className="space-y-3">
