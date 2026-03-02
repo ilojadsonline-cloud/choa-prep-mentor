@@ -1,8 +1,28 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { AppLayout } from "@/components/AppLayout";
-import { CreditCard, Check, Shield, Zap, Star, Clock } from "lucide-react";
+import { CreditCard, Check, Shield, Zap, Star, Clock, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Assinatura = () => {
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
+
+  const handleCheckout = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-checkout");
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, "_blank");
+      }
+    } catch (err: any) {
+      toast({ title: "Erro ao iniciar pagamento", description: err.message, variant: "destructive" });
+    }
+    setLoading(false);
+  };
+
   return (
     <AppLayout>
       <div className="max-w-2xl mx-auto space-y-6">
@@ -55,9 +75,13 @@ const Assinatura = () => {
             ))}
           </div>
 
-          <button className="w-full py-4 rounded-xl gradient-gold text-gold-foreground font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity glow-gold">
-            <CreditCard className="w-4 h-4" />
-            Assinar Agora
+          <button
+            onClick={handleCheckout}
+            disabled={loading}
+            className="w-full py-4 rounded-xl gradient-gold text-gold-foreground font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity glow-gold disabled:opacity-50"
+          >
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CreditCard className="w-4 h-4" />}
+            {loading ? "Redirecionando..." : "Assinar Agora"}
           </button>
 
           <div className="flex items-center justify-center gap-4 mt-4 text-[10px] text-muted-foreground">
