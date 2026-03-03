@@ -33,17 +33,11 @@ function shuffleArray<T>(arr: T[]): T[] {
   return shuffled;
 }
 
-function shuffleAlternatives(q: Questao) {
-  const alts = [
-    { text: q.alt_a, origIndex: 0 },
-    { text: q.alt_b, origIndex: 1 },
-    { text: q.alt_c, origIndex: 2 },
-    { text: q.alt_d, origIndex: 3 },
-    { text: q.alt_e, origIndex: 4 },
-  ];
-  const shuffled = shuffleArray(alts);
-  const newGabarito = shuffled.findIndex(a => a.origIndex === q.gabarito);
-  return { alternativas: shuffled.map(a => a.text), gabarito: newGabarito };
+function getAlternatives(q: Questao) {
+  return {
+    alternativas: [q.alt_a, q.alt_b, q.alt_c, q.alt_d, q.alt_e],
+    gabarito: q.gabarito,
+  };
 }
 
 const Questoes = () => {
@@ -74,7 +68,7 @@ const Questoes = () => {
     const { data, error } = await query.order("id");
     if (!error && data) {
       const shuffled = shuffleArray(data as Questao[]).map(q => {
-        const { alternativas, gabarito } = shuffleAlternatives(q);
+        const { alternativas, gabarito } = getAlternatives(q);
         return { ...q, alternativas, gabaritoShuffled: gabarito };
       });
       setQuestoes(shuffled);

@@ -1,12 +1,17 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
-import { Shield, Bell } from "lucide-react";
+import { Shield, Bell, ArrowLeft } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface AppLayoutProps {
   children: React.ReactNode;
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const showBack = location.pathname !== "/dashboard";
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
@@ -15,6 +20,15 @@ export function AppLayout({ children }: AppLayoutProps) {
           <header className="h-14 flex items-center justify-between border-b border-border/50 px-4 bg-card/50 backdrop-blur-sm sticky top-0 z-30">
             <div className="flex items-center gap-3">
               <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
+              {showBack && (
+                <button
+                  onClick={() => navigate(-1)}
+                  className="p-1.5 rounded-lg hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
+                  title="Voltar"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                </button>
+              )}
               <div className="hidden sm:flex items-center gap-2">
                 <Shield className="w-4 h-4 text-primary" />
                 <span className="text-sm font-semibold text-gradient-primary">Método CHOA 2026</span>
